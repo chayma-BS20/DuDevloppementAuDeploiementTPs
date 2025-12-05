@@ -1,0 +1,66 @@
+
+# Gestion des Données et des Volumes Docker
+
+Les données à l'intérieur d'un conteneur sont **éphémères**; elles seront supprimées dès la fermeture du conteneur. Pour garantir la persistance des données, on utilise les **Volumes**.
+
+##  Les 3 Types de Volumes
+
+1.  **Bind Mount (Montage par Liaison) :** Ce type de volume lie un dossier existant sur le système de fichiers de l'hôte directement au conteneur. Son inconvénient majeur est qu'il **dépend du système de fichiers de l'hôte** (moins portable) et présente un risque de sécurité si les permissions sont mal configurées.
+
+2.  **Volume Géré par Docker (Volumes Recommandés) :** Ce sont les volumes recommandés, car Docker gère leur stockage et leur emplacement (généralement dans `/var/lib/docker/volumes`). Ils sont **indépendants du système d'exploitation hôte**, plus sûrs et plus faciles à sauvegarder.
+
+3.  **Tempfs (Stockage en Mémoire Uniquement) :** Ce volume est un espace de stockage temporaire qui utilise uniquement la **RAM** de l'hôte. Il est très rapide, mais toutes les données sont **perdues après le redémarrage** du conteneur ou de l'hôte.
+
+##  Commandes de Gestion des Volumes
+
+* `docker volume create monvolume`: Crée un nouveau volume géré par Docker, nommé `monvolume`.
+* `docker volume ls`: Liste tous les volumes existants sur la machine hôte.
+* `docker volume inspect "nomduvolume"`: Affiche les détails de configuration d'un volume, y compris son chemin de montage.
+* `docker volume rm monvolume`: Supprime un volume spécifique.
+* `docker volume prune`: Efface tous les volumes qui ne sont actuellement utilisés par aucun conteneur.
+
+### Utilisation d'un Volume Persistant
+
+* `docker run -it -v monvolume:/data alpine sh`: Crée un conteneur et **attache le volume `monvolume`** au point de montage `/data` dans le conteneur.
+* `echo "bonjour" > /data/texte.txt`: Action dans le conteneur pour créer un fichier dans le volume, assurant la persistance des données.
+
+**Règle d'usage :** Vous ne pouvez pas effacer un volume s'il est utilisé par un conteneur actif. Si un volume est utilisé par un autre conteneur, il faut d'abord le détacher (arrêter puis supprimer le conteneur) pour le libérer.
+
+---
+
+# Le Dockerfile : Construction d'Images
+
+Le **Dockerfile** est le plan de construction de votre image Docker. Notez qu'il n'a **aucune extension**.
+
+* `FROM`: Choisir l'image de base (le système d'exploitation de départ).
+* `RUN`: Exécuter une commande pendant la phase de construction de l'image (ex: installer des paquets).
+* `COPY`: Copier des fichiers ou dossiers locaux depuis le contexte de construction vers l'image.
+* `WORKDIR`: Définir le dossier de travail par défaut pour les commandes suivantes.
+* `EXPOSE`: Documenter le port exposé par l'application (information pour l'utilisateur).
+* `CMD`/`ENTRYPOINT`: Définir la commande lancée au moment où le conteneur démarre.
+
+---
+
+#  Réseaux et Commandes Avancées Docker
+
+## Concepts Clés
+
+* Le **Docker Engine** est accessible via une **API REST**.
+* Le **Mapping de conteneur** redirige le trafic d'un port de la machine hôte (ex: `4900`) vers le port du conteneur (ex: `5000`).
+
+## Commandes Réseau
+
+* `docker run -d --name web nginx`: Lance un conteneur qui est automatiquement attaché au réseau **bridge par défaut**.
+* `docker network inspect bridge`: Affiche les détails de configuration du réseau **bridge**.
+* `docker run --network none -it alpine sh`: Lance un conteneur **totalement isolé** du réseau.
+* `docker run --network host -it alpine sh`: Lance un conteneur qui **partage la pile réseau de l'hôte**.
+* `docker network connect monreseau site`: **Ajoute un conteneur existant** (`site`) à un réseau existant.
+* `docker network disconnect monreseau site`: **Retire un conteneur** d'un réseau spécifique.
+* `docker push nom_image`: **Publie une image locale** vers un registre d'images.
+
+---
+
+## Utilité de Docker Compose
+
+**Pourquoi créer Docker Compose ?**
+Docker Compose simplifie le travail avec les applications complexes en permettant de définir, gérer et exécuter tous les composants (services, **networks**, **volumes**) via un seul fichier, offrant une solution complète pour les environnements multi-conteneurs.
