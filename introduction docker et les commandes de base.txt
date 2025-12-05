@@ -1,0 +1,53 @@
+##  Orchestration et Clusters
+
+**Docker Swarm** est l'orchestrateur de conteneurs natif de Docker. Il permet de créer et de gérer un cluster simple directement avec les commandes Docker.
+
+**Docker Compose** est l'outil idéal pour l'orchestration de plusieurs conteneurs qui composent une seule application (API, base de données, cache). Il permet de démarrer et de gérer tous ces services simultanément sur une machine hôte unique.
+
+**Minikube** est spécifiquement conçu pour créer un cluster Kubernetes localement. C'est l'outil recommandé pour l'apprentissage et les tests K8s.
+
+**KIND** (Kubernetes in Docker) est une alternative qui permet de créer un cluster Kubernetes local en utilisant des conteneurs Docker comme "nœuds" du cluster.
+
+---
+
+##  Concepts d'Isolation et de Sécurité
+
+Les conteneurs sont moins isolés que les machines virtuelles (VM) car ils **partagent le même système d'exploitation** (OS) de la machine hôte. Cette conteneurisation offre une isolation pas complète. À l'inverse, la virtualisation offre une **isolation forte** puisque chaque VM a son propre OS invité, ce qui réduit les problèmes de sécurité liés au partage du noyau.
+
+---
+
+##  Gestion des Images Légères (ex. Alpine)
+
+Dans des versions d'OS tellement légères (comme Alpine), on ne trouve même pas un éditeur de texte ou des outils de base. Pour ajouter des dépendances (par exemple, un éditeur de texte), vous devez utiliser le gestionnaire de paquets de la distribution : `apk add vim`.
+
+Votre document fait aussi référence à des sujets de QCM potentiels incluant **Docker, Kubernetes, SOAP, Spring Boot**.
+
+---
+
+## Commandes Docker : Conteneurs et Images
+
+### 1. Visualisation et Exécution
+
+* `docker ps`: Cette commande permet de **lister les conteneurs en cours d'exécution** sur la machine.
+* `docker ps -a`: Cette commande étend la liste pour inclure **tous les conteneurs**, qu'ils soient actifs ou arrêtés.
+* `docker run -ti --name C1 alpine`: Cette commande crée et démarre un conteneur basé sur l'image `alpine` et lui attribue un nom (`C1`) pour un référencement facile.
+* `docker exec -it testdemo sh`: Cette commande permet d'**accéder à un conteneur** en cours d'exécution (`testdemo`) pour y ouvrir un shell interactif (`sh`).
+* `docker start idContenaire`: Cette commande est utilisée pour **réveiller un conteneur** qui avait été précédemment arrêté.
+
+### 2. Suppression et Nettoyage
+
+* `docker rm idContenaire`: Cette commande **efface un conteneur** spécifique (le conteneur doit être arrêté au préalable).
+* `docker rm -f idContenaire`: Le drapeau `-f` permet de **forcer la suppression** d'un conteneur, même s'il est en cours d'exécution.
+* `docker rm -f $(docker ps -aq)`: Cette combinaison de commandes efface **tous les conteneurs existants** (actifs et arrêtés) sur la machine.
+* `docker image prune`: Cette commande est utilisée pour **effacer toutes les images** Docker qui ne sont plus utilisées par aucun conteneur.
+
+### 3. Construction et Exportation
+
+* `docker build -t demontest .`: Cette commande **construit une image** Docker à partir du Dockerfile présent dans le répertoire courant (`.`) et lui attribue le nom `demontest`.
+* Un fichier Dockerfile commence toujours par **`FROM`** une image de base.
+* `docker export id -o test.tar`: Cette commande permet de **zipper le système de fichiers d'un conteneur** en cours d'exécution pour l'exporter dans un fichier `test.tar`.
+* `docker import test.tar monimage`: Cette commande permet de **créer une nouvelle image Docker** (`monimage`) à partir de l'archive `test.tar` précédemment exportée.
+
+### 4. Note sur l'Évolutivité
+
+Les conteneurs sont créés pour la **mise à l'échelle** horizontale, ce qui signifie que de nombreux conteneurs héritant de la même image de base peuvent être lancés pour gérer la charge de travail.
